@@ -157,3 +157,60 @@ draw_world();
 ```
 
 ---
+
+## Block Rotation
+When space bar is pressed, rotate the generated block counter-clock wise (90 degree).
+```c++
+// rotate shape
+auto rotate = [&]()
+{
+    // check rotation block size
+    int len = 0;
+    for (int y = 0; y < 4; y++)
+    {
+        for (int x = 0; x < 4; x++)
+        {
+            if (shapes[block][y][x])
+            {
+                len = max(max(x, y) + 1, len);
+            }
+        }
+    }
+
+    int rotated_block[4][4] = { 0 };
+
+    // rotate conter-clock-wise (90 degree)
+    for (int y = 0; y < len; y++)
+    {
+        for (int x = 0; x < len; x++)
+        {
+            if (shapes[block][y][x])
+            {
+                rotated_block[len - 1 - x][y] = 1;
+            }
+        }
+    }
+
+    for (int y = 0; y < 4; y++)
+    {
+        for (int x = 0; x < 4; x++)
+        {
+            shapes[block][y][x] = rotated_block[y][x];
+        }
+    }
+};
+```
+However, if rotation hits the grid(world) boundary, do not allow to rotate.
+```c++
+else if (e.key.code == Keyboard::Up)
+{
+    rotate();
+
+    // if rotation hits boundary, do not allow to rotate
+    if (check_block_boundary() == false)
+    {
+        rotate(), rotate(), rotate();
+    }
+}
+```
+---
