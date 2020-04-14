@@ -5,13 +5,13 @@
 using namespace std;
 using namespace sf;
 
-// Define grid parameters
+// Define world parameters
 const int CellSize = 25;
 const int Width = 10;
 const int Height = 20;
 
-// Define Grid (World)
-int GRID[Height][Width] = { 0 };
+// Define world
+int world[Height][Width] = { 0 };
 
 extern int shapes[7][4][4];
 extern const Color colors[];
@@ -21,7 +21,7 @@ int main()
     // a window that can render 2D drawings
     RenderWindow window(VideoMode(Width * CellSize, Height * CellSize), "Tetris");
 
-    // draw a cell in the grid
+    // draw a cell in the world
     RectangleShape cell(Vector2f(CellSize, CellSize));
 
     // populate a block
@@ -39,7 +39,7 @@ int main()
     new_block();
 
     // boundary check for a block
-    auto check_block_bounary = [&]()
+    auto check_block_boundary = [&]()
     {
         for (int y = 0; y < 4; y++)
         {
@@ -48,12 +48,12 @@ int main()
                 if (shapes[block][y][x] == 0)
                     continue;
 
-                // hit Grid boundary
+                // hit world boundary
                 if (x + b_x < 0 || x + b_x >= Width || y + b_y >= Height)
                     return false;
 
-                // collsion with GRID blocks
-                if (GRID[y + b_y][x + b_x] == true)
+                // collsion with world blocks
+                if (world[y + b_y][x + b_x] )
                     return false;
             }
 
@@ -61,8 +61,48 @@ int main()
         return true;
     };
 
+    // fall down
+    auto fall_down = [&]()
+    {
+        b_y++;
+
+        // hit bottom
+        if (check_block_boundary() == false)
+        {
+            b_y--;
+            for (int y = 0; y < 4; y++)
+            {
+                for (int x = 0; x < 4; x++)
+                {
+                    if (shapes[block][y][x])
+                    {
+                        //+1 for avoiding 0
+                        world[b_y + y][b_x + x] = block + 1;
+                    }
+
+                }
+            }
+
+            //start next block
+            new_block();
+
+            return false;
+        }
+        return true;
+    };
+
+    Clock clock;
+
     while (window.isOpen())
     {
+        // start clock
+        static float prev = clock.getElapsedTime().asSeconds();
+        if (clock.getElapsedTime().asSeconds() - prev >= 0.5)
+        {
+            prev = clock.getElapsedTime().asSeconds();
+            fall_down();
+        }
+
         // Define system event
         Event e;
 
@@ -78,23 +118,45 @@ int main()
             {
                 if (e.key.code == Keyboard::Left) {
                     b_x--;
-                    if (check_block_bounary() == false) b_x++;
+                    if (check_block_boundary() == false) b_x++;
                 }
                 else if (e.key.code == Keyboard::Right)
                 {
                     b_x++;
-                    if (check_block_bounary() == false) b_x--;
+                    if (check_block_boundary() == false) b_x--;
                 }
                 else if (e.key.code == Keyboard::Down)
                 {
-                    b_y++;
-                    if (check_block_bounary() == false) b_y--;
+                    fall_down();
+                }
+                else if (e.key.code == Keyboard::Space)
+                {
+                    // fall down until reaches the bottom
+                    while (fall_down() == true);
                 }
             }
         }
 
         // clear window every frame
         window.clear();
+
+        // draw world
+        auto draw_world = [&]()
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    if (world[y][x])
+                    {
+                        cell.setFillColor(colors[world[y][x] - 1]);
+                        cell.setPosition(Vector2f(x * CellSize, y * CellSize));
+                        window.draw(cell);
+                    }
+                }
+            }
+        };
+        draw_world();
 
         // define C++11 lambda function
         // this function can use all the outside variables, such as block
