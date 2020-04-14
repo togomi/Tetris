@@ -46,3 +46,41 @@ int shapes[7][4][4] =
     0,0,0,0 // O
 };
 ```
+
+## Collision Detection (Boundary Check)
+If a block hits boudary, should not go outside of the well.
+
+```c++
+// Define grid parameters
+const int CellSize = 25;
+const int Width = 10;
+const int Height = 20;
+
+// Define Grid (World)
+int GRID[Height][Width] = { 0 };
+
+...
+
+// boundary check for a block
+auto check_block_bounary = [&]()
+{
+    for (int y = 0; y < 4; y++)
+    {
+        for (int x = 0; x < 4; x++)
+        {
+            if (shapes[block][y][x] == 0)
+                continue;
+
+            // hit Grid boundary
+            if (x + b_x < 0 || x + b_x >= Width || y + b_y >= Height)
+                return false;
+
+            // collsion with GRID blocks
+            if (GRID[y + b_y][x + b_x] == true)
+                return false;
+        }
+
+    }
+    return true;
+};
+```

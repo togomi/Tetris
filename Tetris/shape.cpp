@@ -3,11 +3,6 @@
 using namespace std;
 using namespace sf;
 
-// Define grid
-const int CellSize = 25;
-const int Width = 10;
-const int Height = 20;
-
 // Define Shape
 int shapes[7][4][4] =
 {
