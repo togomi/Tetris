@@ -1,3 +1,5 @@
+# Essesntial  Functionality
+
 ## The Grid
 The vast majority of tetromino based game use a playfield 10 cells wide and between 16 and 24 cells tall. I chose 20 cells tall grid.
 
@@ -213,4 +215,36 @@ else if (e.key.code == Keyboard::Up)
     }
 }
 ```
+
 ---
+## Delete filled lines
+clear lines when grid(world) width is full.
+```c++
+// clear lines when grid width is full-filled
+auto clear_lines = [&]()
+{
+    int deleted_line = Height - 1;
+
+    //from bottom line to top line...
+    for (int undeleted_line = Height - 1; undeleted_line >= 0; undeleted_line--)
+    {
+        int count_width = 0;
+        for (int x = 0; x < Width; x++)
+        {
+            if (world[undeleted_line][x])
+                count_width++;
+        }
+
+        // if current line is not full, copy lines
+        // else, the line will be deleted
+        if (count_width < Width)
+        {
+            for (int x = 0; x < Width; x++)
+                world[deleted_line][x] = world[undeleted_line][x];
+
+            deleted_line--;
+        }
+
+    }
+};
+```

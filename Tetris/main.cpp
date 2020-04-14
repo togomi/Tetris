@@ -61,6 +61,34 @@ int main()
         return true;
     };
 
+    // clear lines when grid width is full-filled
+    auto clear_lines = [&]()
+    {
+        int deleted_line = Height - 1;
+
+        //from bottom line to top line...
+        for (int undeleted_line = Height - 1; undeleted_line >= 0; undeleted_line--)
+        {
+            int count_width = 0;
+            for (int x = 0; x < Width; x++)
+            {
+                if (world[undeleted_line][x])
+                    count_width++;
+            }
+
+            // if current line is not full, copy lines
+            // else, the line will be deleted
+            if (count_width < Width)
+            {
+                for (int x = 0; x < Width; x++)
+                    world[deleted_line][x] = world[undeleted_line][x];
+
+                deleted_line--;
+            }
+
+        }
+    };
+
     // fall down
     auto fall_down = [&]()
     {
@@ -76,14 +104,16 @@ int main()
                 {
                     if (shapes[block][y][x])
                     {
-                        //+1 for avoiding 0
+                        // +1 for avoiding 0
                         world[b_y + y][b_x + x] = block + 1;
                     }
 
                 }
             }
+            // delete lines
+            clear_lines();
 
-            //start next block
+            // start next block
             new_block();
 
             return false;
